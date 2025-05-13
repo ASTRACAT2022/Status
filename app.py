@@ -13,7 +13,7 @@ SERVICES = {
 
 def check_status(url):
     try:
-        r = requests.get(url, timeout=5)
+        r = requests.get(url, timeout=50)
         return r.status_code == 200
     except:
         return False
