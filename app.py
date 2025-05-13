@@ -1,5 +1,6 @@
 from flask import Flask, render_template
 import cloudscraper
+import socket
 
 app = Flask(__name__)
 scraper = cloudscraper.create_scraper()
@@ -12,12 +13,21 @@ SERVICES = {
     "ASTRACAT ShereVPN": "https://vpn-free-astra-net-v1.onrender.com"
 }
 
+def dns_check(hostname):
+    try:
+        socket.gethostbyname(hostname)
+        return True
+    except:
+        return False
+
 def check_status(url):
     try:
         response = scraper.get(url, timeout=5)
         return response.status_code == 200
     except:
-        return False
+        # fallback: DNS check
+        hostname = url.split("//")[-1].split("/")[0]
+        return dns_check(hostname)
 
 @app.route("/")
 def index():
