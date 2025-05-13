@@ -1,10 +1,11 @@
 from flask import Flask, render_template
-import requests
+import cloudscraper
 
 app = Flask(__name__)
+scraper = cloudscraper.create_scraper()
 
 SERVICES = {
-    "Основной сайт": "https://astracat.vercel.app",
+    "Основной сайт ASTRACAT": "https://astracat.vercel.app",
     "ASTRACAT DNS": "https://astracat-dns.vercel.app",
     "Генератор Xray VPN": "https://vpngen.vercel.app",
     "WARP генератор": "https://warp-liart.vercel.app",
@@ -13,8 +14,8 @@ SERVICES = {
 
 def check_status(url):
     try:
-        r = requests.get(url, timeout=50)
-        return r.status_code == 200
+        response = scraper.get(url, timeout=5)
+        return response.status_code == 200
     except:
         return False
 
@@ -22,7 +23,7 @@ def check_status(url):
 def index():
     statuses = {}
     for name, url in SERVICES.items():
-        statuses[name] = "🟢 Онлайн" if check_status(url) else "🔴 Оффлайн"
+        statuses[name] = "🟢 В сети" if check_status(url) else "🔴 Не работает"
     return render_template("index.html", statuses=statuses)
 
 if __name__ == "__main__":
