@@ -1,57 +1,40 @@
 from flask import Flask, render_template
+import cloudscraper
 import socket
-import subprocess
-import platform
-import re
-import time
-import json
 
 app = Flask(__name__)
+scraper = cloudscraper.create_scraper()
 
-LOG_FILE = "ping_log.json"
-PING_TARGET = "85.209.2.112"
+SERVICES = {
+    "Основной сайт ASTRACAT": "https://astracat.vercel.app",
+    "ASTRACAT DNS": "https://astracat-dns.vercel.app",
+    "Генератор Xray VPN": "https://vpngen.vercel.app",
+    "WARP генератор": "https://warp-liart.vercel.app",
+    "ASTRACAT ShereVPN": "https://vpn-free-astra-net-v1.onrender.com"
+}
 
-def ping_latency(hostname):
+def dns_check(hostname):
     try:
-        param = '-n' if platform.system().lower() == 'windows' else '-c'
-        result = subprocess.run(['ping', param, '1', hostname], capture_output=True, text=True, timeout=3)
-        if result.returncode == 0:
-            output = result.stdout
-            match = re.search(r'time[=<]?\s?(\d+\.?\d*)\s?ms', output)
-            if match:
-                return float(match.group(1))
+        socket.gethostbyname(hostname)
+        return True
     except:
-        return None
-    return None
+        return False
 
-def log_latency(latency):
-    timestamp = int(time.time())
-    log = []
-    if os.path.exists(LOG_FILE):
-        try:
-            with open(LOG_FILE, "r") as f:
-                log = json.load(f)
-        except:
-            pass
-    log.append({"time": timestamp, "latency": latency if latency is not None else 0})
-    log = log[-50:]  # максимум 50 точек
-    with open(LOG_FILE, "w") as f:
-        json.dump(log, f)
+def check_status(url):
+    try:
+        response = scraper.get(url, timeout=5)
+        return response.status_code == 200
+    except:
+        # fallback: DNS check
+        hostname = url.split("//")[-1].split("/")[0]
+        return dns_check(hostname)
 
 @app.route("/")
 def index():
-    latency = ping_latency(PING_TARGET)
-    log_latency(latency)
-    return render_template("index.html", latency=latency)
-
-@app.route("/chart")
-def chart():
-    try:
-        with open(LOG_FILE, "r") as f:
-            data = json.load(f)
-    except:
-        data = []
-    return render_template("chart.html", data=data)
+    statuses = {}
+    for name, url in SERVICES.items():
+        statuses[name] = "🟢 В сети" if check_status(url) else "🔴 Не работает"
+    return render_template("index.html", statuses=statuses)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
