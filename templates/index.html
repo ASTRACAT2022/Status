@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Статус ASTRACAT</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📡 Статус <span class="brand">ASTRACAT</span></h1>
+        <ul>
+            {% for name, status in statuses.items() %}
+                <li><span class="name">{{ name }}</span><span class="status">{{ status }}</span></li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>

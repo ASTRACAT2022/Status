@@ -1,0 +1,53 @@
+body {
+    background-color: #121212;
+    color: #e0e0e0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 600px;
+    margin: 5vh auto;
+    padding: 2rem;
+    background-color: #1e1e1e;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.6);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #90caf9;
+}
+
+.brand {
+    color: #f48fb1;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    display: flex;
+    justify-content: space-between;
+    background: #2c2c2c;
+    margin-bottom: 0.7rem;
+    padding: 1rem;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+li:hover {
+    background: #333;
+}
+
+.name {
+    font-weight: 500;
+}
+
+.status {
+    font-weight: bold;
+}
