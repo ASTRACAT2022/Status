@@ -10,7 +10,7 @@ SERVICES = {
     "ASTRACAT DNS": "https://astracat-dns.vercel.app",
     "Генератор Xray VPN": "https://vpngen.vercel.app",
     "WARP генератор": "https://warp-liart.vercel.app",
-    "ASTRACAT ShereVPN": "https://vpn-free-astra-net-v1.onrender.com"
+    "ASTRACAT ShereVPN": "https://vpn-free-astra-net-v1-aayk.onrender.com"
 }
 
 def dns_check(hostname):
