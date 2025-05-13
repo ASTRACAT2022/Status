@@ -1,39 +1,54 @@
 from flask import Flask, render_template
-import cloudscraper
 import socket
+import subprocess
+import platform
+import re
 
 app = Flask(__name__)
-scraper = cloudscraper.create_scraper()
 
 SERVICES = {
-    "Основной сайт ASTRACAT": "https://astracat.vercel.app",
-    "ASTRACAT DNS": "https://astracat-dns.vercel.app",
-    "Генератор Xray VPN": "https://vpngen.vercel.app",
-    "WARP генератор": "https://warp-liart.vercel.app",
-    "ASTRACAT ShereVPN": "https://vpn-free-astra-net-v1.onrender.com"
+    "Основной сайт ASTRACAT": "astracat.vercel.app",
+    "ASTRACAT DNS": "astracat-dns.vercel.app",
+    "Генератор Xray VPN": "vpngen.vercel.app",
+    "WARP генератор": "warp-liart.vercel.app",
+    "ASTRACAT ShereVPN": "vpn-free-astra-net-v1.onrender.com",
+    "Сервер 85.209.2.112": "85.209.2.112"
 }
 
-def dns_check(hostname):
-    try:
-        socket.gethostbyname(hostname)
-        return True
-    except:
-        return False
+def is_ip(hostname):
+    return all(part.isdigit() and 0 <= int(part) <= 255 for part in hostname.split('.') if part)
 
-def check_status(url):
+def ping_host(hostname):
     try:
-        response = scraper.get(url, timeout=5)
-        return response.status_code == 200
+        param = '-n' if platform.system().lower() == 'windows' else '-c'
+        result = subprocess.run(['ping', param, '1', hostname], capture_output=True, text=True, timeout=3)
+        if result.returncode == 0:
+            output = result.stdout
+            match = re.search(r'time[=<]?\s?(\d+\.?\d*)\s?ms', output)
+            if match:
+                return f"🟢 {match.group(1)} ms"
+            else:
+                return "🟢 В сети"
+        else:
+            return "🔴 Не работает"
     except:
-        # fallback: DNS check
-        hostname = url.split("//")[-1].split("/")[0]
-        return dns_check(hostname)
+        return "🔴 Не работает"
+
+def check_status(hostname):
+    try:
+        if is_ip(hostname):
+            return ping_host(hostname)
+        else:
+            socket.gethostbyname(hostname)
+            return "🟢 В сети"
+    except:
+        return "🔴 Не работает"
 
 @app.route("/")
 def index():
     statuses = {}
-    for name, url in SERVICES.items():
-        statuses[name] = "🟢 В сети" if check_status(url) else "🔴 Не работает"
+    for name, host in SERVICES.items():
+        statuses[name] = check_status(host)
     return render_template("index.html", statuses=statuses)
 
 if __name__ == "__main__":
